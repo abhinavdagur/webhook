@@ -68,7 +68,7 @@ restService.listen((process.env.PORT || 5000), function () {
     console.log("Server listening");
 });
 
-/*function callGetAccessToken() {
+function callGetAccessToken() {
 
     var optionsgetAccessToken = {
         host: 'rws3220164.us.oracle.com', // here only the domain name (no http/https !)
@@ -124,7 +124,7 @@ restService.listen((process.env.PORT || 5000), function () {
 }
 
 
-function callPost() {
+/*function callPost() {
     var body = '<params>121212</params>';
     
     var postheaders = {
