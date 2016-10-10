@@ -38,7 +38,7 @@ restService.post('/hook', function (req, res) {
 
                 if (requestBody.result.action) {
                 	  //calling EBS WS
-                	  //callGetAccessToken();
+                	  callGetAccessToken();
                 	  
                     speech += 'EBS action: ' + requestBody.result.action;
                 }
