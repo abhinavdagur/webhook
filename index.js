@@ -109,7 +109,7 @@ function callGetAccessToken() {
     			console.info('tokenName :'+tokenName);
     			console.info('tokenValue :'+tokenValue);
 	        if (res.statusCode == '200') {
-    				//callPost();
+    				callPost();
     			}
     				
   			});
