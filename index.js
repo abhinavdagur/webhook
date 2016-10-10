@@ -4,14 +4,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 //EBS WS changes start
-var https = require('https');
+/*var https = require('https');
 var http = require('http');
 var username = 'operations';
 var password = 'welcome';
 var reqPost;
 var tokenName;
 var tokenValue;
-var xml2js = require('xml2js');
+var xml2js = require('xml2js');*/
 //EBS WS changes End
 
 const restService = express();
@@ -68,7 +68,7 @@ restService.listen((process.env.PORT || 5000), function () {
     console.log("Server listening");
 });
 
-function callGetAccessToken() {
+/*function callGetAccessToken() {
 
     var optionsgetAccessToken = {
         host: 'rws3220164.us.oracle.com', // here only the domain name (no http/https !)
@@ -164,3 +164,4 @@ function callPost() {
         console.error(e);
     });
 }
+*/
