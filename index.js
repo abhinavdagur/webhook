@@ -4,14 +4,14 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 //EBS WS changes start
-/*var https = require('https');
+var https = require('https');
 var http = require('http');
 var username = 'operations';
 var password = 'welcome';
 var reqPost;
 var tokenName;
 var tokenValue;
-var xml2js = require('xml2js');*/
+var xml2js = require('xml2js');
 //EBS WS changes End
 
 const restService = express();
