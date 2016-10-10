@@ -11,7 +11,7 @@ var password = 'welcome';
 var reqPost;
 var tokenName;
 var tokenValue;
-//var xml2js = require('xml2js');
+var xml2js = require('xml2js');
 //EBS WS changes End
 
 const restService = express();
@@ -92,14 +92,14 @@ function callGetAccessToken() {
             console.info(d.toString());
             
             var extractedData = "";
-            /*var parser = new xml2js.Parser();
+            var parser = new xml2js.Parser();
             
             parser.parseString(d, function (err, result) {
               tokenName = result.response.data[0].accessTokenName.toString();
               tokenValue = result.response.data[0].accessToken.toString();
               console.dir(tokenName);
               console.dir(tokenValue);
-						});*/
+						});
             
             console.info('\n\nCall completed');
             
@@ -123,8 +123,7 @@ function callGetAccessToken() {
     });
 }
 
-
-/*function callPost() {
+function callPost() {
     var body = '<params>121212</params>';
     
     var postheaders = {
@@ -164,4 +163,3 @@ function callGetAccessToken() {
         console.error(e);
     });
 }
-*/
