@@ -36,7 +36,6 @@ restService.post('/hook', function (req, res) {
                     speech += ' ';
                 }
 								console.log('requestBody.result: ', requestBody.result);
-								console.log('requestBody.result.result.parameters.order_number: ', requestBody.result.parameters.order_number);
                 if (requestBody.result.action) {
                 	  //calling EBS WS
                 	 if (requestBody.result.action === 'repeat.order'){
@@ -69,11 +68,6 @@ restService.post('/hook', function (req, res) {
 
         console.log('result: ', speech);
 
-        /*return res.json({
-            speech: speech,
-            displayText: speech,
-            source: 'ebs-team-integration'
-        });*/
     } catch (err) {
         console.error("Can't process request", err);
 
@@ -130,11 +124,28 @@ function processRepeatOrder(orderNumber,callback) {
 		    		
 		    	});
 	
-	})
+	});
 }
 
-function processCreateOrder(itemName,qty) {
+function processCreateOrder(itemName,qty,callback) {
+	getAccessToken(function(tokenName,tokenValue){
+		   
+		    	callCreateOrder(itemName,qty,tokenName,tokenValue,function(inputXml){
+		    		
+		    		console.log("inputXml :"+inputXml);
+            var parser = new xml2js.Parser();
+            
+            parser.parseString(inputXml, function (err, result) {
+            	
+            	return callback(JSON.stringify(result));
+            	
+            	
+						});		    		
+		    		
+		    		
+		    	});
 	
+	});
 	
 }
 
@@ -210,6 +221,40 @@ function getOptionsPost(body,EBSFunctionName){
  return optionspost;
 	
 	     
+}
+
+
+function callCreateOrder(itemName,qty,tokenName,tokenValue,callBackLastOrders) {
+	
+    var body = '<params><param>1006</param><param>2626</param><param>1025</param><param>1026</param><param>1</param></params>';
+    var returnxml;
+    
+    var reqPost = http.request(getOptionsPost(body,'ONT_REST_CREATE_ORDER'), function(res) {
+
+        //console.log("POST headers: ", res.headers);
+        console.log(" POST statusCode: ", res.statusCode);
+
+        res.on('data', function(d) {
+            console.info('POST result:\n');
+            //process.stdout.write(d);
+            returnxml = d;
+            //console.info('\n\nPOST completed');
+        });
+        
+        res.on('end', () => {
+	        if (res.statusCode == '200') {
+    				return callBackLastOrders(returnxml);
+    			}
+    				
+  			});        
+    });
+    console.info('after POST body' + body);
+    // write the xml data
+    reqPost.write(body);
+    reqPost.end();
+    reqPost.on('error', function(e) {
+        console.error(e);
+    });
 }
 
 function callRepeatOrders(orderNumber,tokenName,tokenValue,callBackLastOrders) {
