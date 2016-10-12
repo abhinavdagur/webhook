@@ -51,7 +51,13 @@ restService.post('/hook', function (req, res) {
                 	  	 		return res.json({returnedJson});
                 	  	 });
                 	 }else if (requestBody.result.action === 'cancel.order'){
-                	 }else if (requestBody.result.action === 'query.order'){
+                	 }else if (requestBody.result.action === 'queryfew.order'){
+                	 	  processFewOrders(requestBody.result.parameters.count,requestBody.result.parameters.customer_name,function(returnedJson){
+                	 		console.log('result: ', returnedJson);
+                	  	 		return res.json({returnedJson});
+                	  	 });
+                	 	
+                	 	
                 	 }else if (requestBody.result.action === 'expedite.order'){
                 	 
                 	 }
@@ -84,7 +90,7 @@ restService.listen((process.env.PORT || 5000), function () {
     console.log("Server listening");
 });
 
-function processLastOrders(callback) {
+function processFewOrders(count,customerName,callback) {
 		getAccessToken(function(tokenName,tokenValue){
 		   
 		    	callQueryLastOrders(tokenName,tokenValue,function(inputXml){
@@ -272,4 +278,3 @@ function callQueryLastOrders(tokenName,tokenValue,callBackLastOrders) {
 
 
 
-                
