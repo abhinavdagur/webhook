@@ -11,7 +11,7 @@ var password = 'welcome';
 var reqPost;
 var tokenName;
 var tokenValue;
-var xml2js = require('xml2js');
+const xml2js = require('xml2js');
 //EBS WS changes End
 
 const restService = express();
