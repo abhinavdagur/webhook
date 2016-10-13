@@ -2,7 +2,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const request = require('request');
 //EBS WS changes start
 var https = require('https');
 var http = require('http');
@@ -119,7 +119,7 @@ restService.post('/hook', function(req, res) {
                         const cName = requestBody.result.parameters.customer_name;
                         //console.log('qty: ', qty);
                         //console.log('item: ', item);
-                        if (!count || !cName) {
+                        if (!count) {
 
                             return res.json({
                                 status: 'ok',
@@ -159,8 +159,22 @@ restService.post('/hook', function(req, res) {
 });
 
 function getJson(requestBody, res, speech, returnedJson, action) {
-	
-	/*const options = {
+	console.log('action :'+action);
+	if ((action == 'team8-createorder') 
+		||(action == 'team8-expediteorder')){
+	const email = 'abhinav.dagur@oracle.com';//requestBody.result.parameters.email;
+  var subject;
+  if (action === 'team8-createorder'){
+  	subject = 'Order Placed';
+  }else{
+  	subject = 'Order Expedited';
+  }		
+  const message = 'abhinav.dagur@oracle.com';//requestBody.result.parameters.messageOriginal;
+  
+  
+  if (email &&  message) {
+  console.log('Sending email');
+	const options = {
     method: 'POST',
     url: 'http://cass-dev.theiotlabs.com/parse/functions/sendEmail',
     headers: {
@@ -172,7 +186,25 @@ function getJson(requestBody, res, speech, returnedJson, action) {
       subject,
       message
     }
-  };*/
+  };
+  console.log('set options and call request ');
+  request(options, (error, response, body) => {
+    /*res.setHeader('Content-Type', 'application/json');
+    const result = {
+      status: 'ok',
+      incomplete: false,
+      speech: 'email sent!'
+    };
+    console.log('returned result');
+    res.json(result);*/
+    console.log('error: '+error);
+    console.log('error: '+response);
+    console.log('error: '+body);
+    console.log('set options and call request ');
+  });  
+  
+}
+}
   
     if (action === 'team8-createorder') {
         console.log('returnedJson: ', returnedJson);
@@ -189,9 +221,30 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         var result = str.link(llink);
         speech += 'New order# ' + result;
 
-    } else if (action === 'team8-createorder') {} else if (requestBody.result.action === 'team8-expediteorder') {
+    }else if (requestBody.result.action === 'team8-expediteorder') {
 
-    } else if (requestBody.result.action === 'team8-expediteorder') {} else if (requestBody.result.action === 'team8-voidorder') {}
+		}else if (requestBody.result.action === 'team8-queryfeworder') {
+			
+			
+    }else if (requestBody.result.action === 'team8-expediteorder') {} 
+    else if (requestBody.result.action === 'team8-voidorder') {
+    	const status	 = returnedJson.response.salesorder[0].status;
+    	if (!('S' == status)){
+    		speech = 'Order cannot be cancelled. Please contact customer support. ';
+    	}	
+    }
+    else if (requestBody.result.action === 'team8-queryorder') {
+    	//console.log('Order#: ', returnedJson.response.salesorders);
+    	//console.log('Order#: ', returnedJson.response.salesorders[0].salesorder);
+    	//console.log('Order#: ', returnedJson.response.salesorders[0].salesorder[0].ordernumber);
+    		const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
+    		const orderstatus = returnedJson.response.salesorders[0].salesorder[0].orderstatus;
+    		const ordereditem = returnedJson.response.salesorders[0].salesorder[0].ordereditem;
+    		const ordertotal = returnedJson.response.salesorders[0].salesorder[0].ordertotal;
+    		const scheduledshipstate = returnedJson.response.salesorders[0].salesorder[0].scheduledshipstate;
+    	 speech = 'Order '+orderNumber+' contains '+1+' units of '+ordereditem+' worth '+ordertotal+' is in status '+ orderstatus+' and ready to be shipped on '+scheduledshipstate;
+    	 //Order 69384 contains 15 units of AMO-100 worth $1123.87 is ready to be shipped via FedEx on Oct 17, 2016.
+    } 	
 
 
 
@@ -212,7 +265,7 @@ restService.listen((process.env.PORT || 5000), function() {
 function processFewOrders(count, customerName, callback) {
     getAccessToken(function(tokenName, tokenValue) {
 
-        callQueryLastOrders(tokenName, tokenValue, function(inputXml) {
+        callQueryLastOrders(tokenName, tokenValue,count, function(inputXml) {
 
             console.log("inputXml :" + inputXml);
             var parser = new xml2js.Parser();
@@ -419,8 +472,9 @@ function callRepeatOrders(orderNumber, tokenName, tokenValue, callBackLastOrders
     });
 }
 
-function callQueryLastOrders(tokenName, tokenValue, callBackLastOrders) {
-    var body = '<params>121212</params>';
+function callQueryLastOrders(tokenName, tokenValue,days, callBackLastOrders) {
+    //var body = '<params>'+days+'</params>';
+    var body = '<params><param>' + days + '</param></params>';
     var returnxml;
 
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_SALES_ORDERS'), function(res) {
@@ -475,7 +529,7 @@ function processCancelOrders(orderNumber, callback) {
 
 function callCancelOrders(tokenName, tokenValue, orderNumber, processCancelOrders) {
     console.log('in func callCancelOrders');
-    var body = '<params>' + orderNumber + '</params>';
+    var body = '<params><param>' + orderNumber + '</param></params>';
     var returnxml;
     console.log('calling getOptionsPost');
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_CANCEL_ORDER'), function(res) {
@@ -530,7 +584,7 @@ function processQueryOrder(orderNumber, callback) {
 
 function callQueryOrder(tokenName, tokenValue, orderNumber, processQueryOrder) {
     console.log('in func callQueryOrder');
-    var body = '<params><params>' + orderNumber + '</params></params>';
+    var body = '<params><param>' + orderNumber + '</param></params>';
     var returnxml;
     console.log('calling getOptionsPost');
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_GET_ORDER'), function(res) {
