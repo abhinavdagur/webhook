@@ -11,7 +11,7 @@ var password = 'welcome';
 var reqPost;
 var tokenName;
 var tokenValue;
-const xml2js = require('xml2js');
+var xml2js = require('xml2js');
 //EBS WS changes End
 
 const restService = express();
@@ -47,7 +47,8 @@ restService.post('/hook', function (req, res) {
                 	 }else if (requestBody.result.action === 'create.order'){
                 	 		processCreateOrder(requestBody.result.parameters.item_name,requestBody.result.parameters.quantity,function(returnedJson){
                 	 		console.log('result: ', returnedJson);
-                	  	 		return res.json({returnedJson});
+                	  	 		//return res.json({returnedJson});
+                	  	 		return getJson(requestBody,res,speech,returnedJson);
                 	  	 });
                 	 }else if (requestBody.result.action === 'cancel.order'){
                 	 }else if (requestBody.result.action === 'queryfew.order'){
@@ -66,7 +67,7 @@ restService.post('/hook', function (req, res) {
             }
         }
 
-        console.log('result: ', speech);
+        
 
     } catch (err) {
         console.error("Can't process request", err);
@@ -79,6 +80,29 @@ restService.post('/hook', function (req, res) {
         });
     }
 });
+
+function getJson(requestBody,res,speech,returnedJson) {
+	
+	//return res.json({returnedJson});
+	//speech += 'EBS action: ' + requestBody.result.action;
+	//console.log('res: ', res);
+	//console.log('\n');
+	console.log('returnedJson: ', returnedJson);
+	console.log('\n');
+	//console.log('Status: ', returnedJson.response[]);
+	console.log('speech: ', speech);
+	console.log('\n');
+	console.log('Order#: ', returnedJson.response.salesorder[0].ordernumber);
+	//console.log('\n');
+	speech += 'New order# '+returnedJson.response.salesorder[0].ordernumber+'.';
+	speech +=' EBS action: ' + requestBody.result.action;
+	
+return res.json({
+            speech: speech,
+            displayText: speech,
+            source: 'EBS-WebService-Response'
+        });	
+}	
 
 restService.listen((process.env.PORT || 5000), function () {
     console.log("Server listening");
@@ -94,7 +118,8 @@ function processFewOrders(count,customerName,callback) {
             
             parser.parseString(inputXml, function (err, result) {
             	
-            	return callback(JSON.stringify(result));
+            	//return callback(JSON.stringify(result));
+            	return callback(result);
             	
             	
 						});		    		
@@ -116,7 +141,8 @@ function processRepeatOrder(orderNumber,callback) {
             
             parser.parseString(inputXml, function (err, result) {
             	
-            	return callback(JSON.stringify(result));
+            	//return callback(JSON.stringify(result));
+            	return callback(result);
             	
             	
 						});		    		
@@ -128,6 +154,7 @@ function processRepeatOrder(orderNumber,callback) {
 }
 
 function processCreateOrder(itemName,qty,callback) {
+	console.log(" In processCreateOrder :");
 	getAccessToken(function(tokenName,tokenValue){
 		   
 		    	callCreateOrder(itemName,qty,tokenName,tokenValue,function(inputXml){
@@ -137,7 +164,8 @@ function processCreateOrder(itemName,qty,callback) {
             
             parser.parseString(inputXml, function (err, result) {
             	
-            	return callback(JSON.stringify(result));
+            	//return callback(JSON.stringify(result));
+            	return callback(result);
             	
             	
 						});		    		
