@@ -110,6 +110,8 @@ function getJson(requestBody,res,speech,returnedJson, action) {
 return res.json({
             speech: speech,
             displayText: speech,
+            status: 'ok',
+            incomplete: false,
             source: 'EBS-WebService-Response'
         });	
 }	
