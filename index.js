@@ -248,9 +248,10 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
         const orderstatus = returnedJson.response.salesorders[0].salesorder[0].orderstatus;
         const ordereditem = returnedJson.response.salesorders[0].salesorder[0].ordereditem;
+        const orderedquantity = returnedJson.response.salesorders[0].salesorder[0].orderedquantity
         const ordertotal = returnedJson.response.salesorders[0].salesorder[0].ordertotal;
         const scheduledshipstate = returnedJson.response.salesorders[0].salesorder[0].scheduledshipstate;
-        speech = 'Order ' + orderNumber + ' contains ' + 1 + ' units of ' + ordereditem + ' worth ' + ordertotal + ' is in status ' + orderstatus + ' and ready to be shipped on ' + scheduledshipstate;
+        speech = 'Order ' + orderNumber + ' contains ' + orderedquantity + ' units of ' + ordereditem + ' worth ' + ordertotal + ' is in status ' + orderstatus + ' and ready to be shipped on ' + scheduledshipstate;
         //Order 69384 contains 15 units of AMO-100 worth $1123.87 is ready to be shipped via FedEx on Oct 17, 2016.
     }
 
