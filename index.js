@@ -40,19 +40,26 @@ restService.post('/hook', function(req, res) {
                 if (requestBody.result.action) {
                     //calling EBS WS
                     if (requestBody.result.action === 'team8-repeatorder') {
-                        processRepeatOrder(requestBody.result.parameters.order_number, function(returnedJson) {
-                            console.log('result: ', returnedJson);
+                        const order = requestBody.result.parameters.order_number;
+                        console.log('order: ', order);
+                        if (!order) {
+
                             return res.json({
-                                returnedJson
+                                status: 'ok',
+                                incomplete: true
                             });
-                        });
+                        } else {
+                            processRepeatOrder(order, function(returnedJson) {
+                                return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
+                            });
+                        }
 
 
                     } else if (requestBody.result.action === 'team8-createorder') {
                         const item = requestBody.result.parameters.item_name;
                         const qty = requestBody.result.parameters.quantity;
-                        //console.log('qty: ', qty);
-                        //console.log('item: ', item);
+                        console.log('qty: ', qty);
+                        console.log('item: ', item);
                         if (!item || !qty) {
 
                             return res.json({
@@ -86,13 +93,45 @@ restService.post('/hook', function(req, res) {
                         }
                         //END CKASERA
 
-                    } else if (requestBody.result.action === 'team8-queryorder') {} else if (requestBody.result.action === 'team8-queryfeworder') {
-                        processFewOrders(requestBody.result.parameters.count, requestBody.result.parameters.customer_name, function(returnedJson) {
-                            console.log('result: ', returnedJson);
+                    } else if (requestBody.result.action === 'team8-queryorder') {
+                        const orderNumber = requestBody.result.parameters.order_number;
+                        if (!orderNumber) {
+
                             return res.json({
-                                returnedJson
+                                status: 'ok',
+                                incomplete: true
                             });
-                        });
+                        } else {
+
+
+                            //START CKASERA
+                            processQueryOrder(orderNumber, function(returnedJson) {
+                                console.log('result for processQueryOrder: ', returnedJson);
+                                return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
+                            });
+                        }
+                        //END CKASERA                    	
+
+
+                    } else if (requestBody.result.action === 'team8-queryfeworder') {
+                        const count = requestBody.result.parameters.count;
+                        const cName = requestBody.result.parameters.customer_name;
+                        console.log('count: ', count);
+                        console.log('cName: ', cName);
+                        if (!count || !cName) {
+
+                            return res.json({
+                                status: 'ok',
+                                incomplete: true
+                            });
+                        } else {
+
+                            processFewOrders(count, cName, function(returnedJson) {
+                                console.log('result: ', returnedJson);
+                                return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
+                            });
+
+                        }
 
 
                     } else if (requestBody.result.action === 'team8-expediteorder') {
@@ -423,7 +462,7 @@ function callCancelOrders(tokenName, tokenValue, orderNumber, processCancelOrder
     var body = '<params>' + orderNumber + '</params>';
     var returnxml;
     console.log('calling getOptionsPost');
-    var reqPost = http.request(getOptionsPost(body, 'ONT_REST_CANCEL_ORDERS'), function(res) {
+    var reqPost = http.request(getOptionsPost(body, 'ONT_REST_CANCEL_ORDER'), function(res) {
 
         //console.log("POST headers: ", res.headers);
         console.log(" POST statusCode in callCancelOrders: ", res.statusCode);
@@ -451,3 +490,57 @@ function callCancelOrders(tokenName, tokenValue, orderNumber, processCancelOrder
     });
 }
 //END CKASERA
+function processQueryOrder(orderNumber, callback) {
+    getAccessToken(function(tokenName, tokenValue) {
+
+        callQueryOrder(tokenName, tokenValue, orderNumber, function(inputXml) {
+
+            console.log("inputXml :" + inputXml);
+            var parser = new xml2js.Parser();
+
+            parser.parseString(inputXml, function(err, result) {
+
+                //return callback(JSON.stringify(result));
+                return callback(result);
+
+
+            });
+
+
+        });
+
+    })
+}
+
+function callQueryOrder(tokenName, tokenValue, orderNumber, processQueryOrder) {
+    console.log('in func callQueryOrder');
+    var body = '<params>' + orderNumber + '</params>';
+    var returnxml;
+    console.log('calling getOptionsPost');
+    var reqPost = http.request(getOptionsPost(body, 'ONT_REST_GET_ORDER'), function(res) {
+
+        //console.log("POST headers: ", res.headers);
+        console.log(" POST statusCode in callQueryOrder: ", res.statusCode);
+
+        res.on('data', function(d) {
+            console.info('POST result:\n');
+            //process.stdout.write(d);
+            returnxml = d;
+            //console.info('\n\nPOST completed');
+        });
+
+        res.on('end', () => {
+            if (res.statusCode == '200') {
+                return processQueryOrder(returnxml);
+            }
+
+        });
+    });
+    console.info('after POST body' + body);
+    // write the xml data
+    reqPost.write(body);
+    reqPost.end();
+    reqPost.on('error', function(e) {
+        console.error(e);
+    });
+}
