@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
 const request = require('request');
 //EBS WS changes start
@@ -161,7 +160,7 @@ restService.post('/hook', function(req, res) {
 
 function getJson(requestBody, res, speech, returnedJson, action) {
     console.log('action :' + action);
-    /*app.use('/sendEmail.json', (req, res) => {
+    /*restService.use('/sendEmail.json', (req, res) => {
         if ((action == 'team8-createorder') ||
             (action == 'team8-expediteorder')) {
             const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
