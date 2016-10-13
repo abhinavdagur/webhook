@@ -38,27 +38,28 @@ restService.post('/hook', function (req, res) {
 								console.log('requestBody.result: ', requestBody.result);
                 if (requestBody.result.action) {
                 	  //calling EBS WS
-                	 if (requestBody.result.action === 'repeat.order'){
+                	 if (requestBody.result.action === 'team8-repeatorder'){
                 	  	 processRepeatOrder(requestBody.result.parameters.order_number,function(returnedJson){
                 	  	 		console.log('result: ', returnedJson);
                 	  	 		return res.json({returnedJson});
                 	  	 });	
                 	  	 
-                	 }else if (requestBody.result.action === 'create.order'){
+                	 }else if (requestBody.result.action === 'team8-createorder'){
                 	 		processCreateOrder(requestBody.result.parameters.item_name,requestBody.result.parameters.quantity,function(returnedJson){
                 	 		console.log('result: ', returnedJson);
                 	  	 		//return res.json({returnedJson});
                 	  	 		return getJson(requestBody,res,speech,returnedJson);
                 	  	 });
-                	 }else if (requestBody.result.action === 'cancel.order'){
-                	 }else if (requestBody.result.action === 'queryfew.order'){
+                	 }else if (requestBody.result.action === 'team8-cancelorder'){
+                	 }else if (requestBody.result.action === 'team8-queryorder'){
+                	 }else if (requestBody.result.action === 'team8-queryfeworder'){
                 	 	  processFewOrders(requestBody.result.parameters.count,requestBody.result.parameters.customer_name,function(returnedJson){
                 	 		console.log('result: ', returnedJson);
                 	  	 		return res.json({returnedJson});
                 	  	 });
                 	 	
                 	 	
-                	 }else if (requestBody.result.action === 'expedite.order'){
+                	 }else if (requestBody.result.action === 'team8-expediteorder'){
                 	 
                 	 }
                 	  
