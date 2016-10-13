@@ -32,8 +32,9 @@ restService.post('/hook', function (req, res) {
                 speech = '';
 								console.log('fulfillment: ', requestBody.result.fulfillment);
                 if (requestBody.result.fulfillment) {
-                    speech += requestBody.result.fulfillment.speech;
-                    speech += ' ';
+                	  console.log('Initial speech: ', requestBody.result.fulfillment.speech);
+                    speech += requestBody.result.fulfillment.speech+' ';
+                    console.log('Initial speech:1: ', requestBody.result.fulfillment.speech);
                 }
 								console.log('requestBody.result: ', requestBody.result);
                 if (requestBody.result.action) {
@@ -63,7 +64,7 @@ restService.post('/hook', function (req, res) {
                 	 
                 	 }
                 	  
-                    speech += 'EBS action: ' + requestBody.result.action;
+                    //speech += 'EBS action: ' + requestBody.result.action;
                 }
             }
         }
@@ -84,19 +85,17 @@ restService.post('/hook', function (req, res) {
 
 function getJson(requestBody,res,speech,returnedJson) {
 	
-	//return res.json({returnedJson});
-	//speech += 'EBS action: ' + requestBody.result.action;
-	//console.log('res: ', res);
-	//console.log('\n');
 	console.log('returnedJson: ', returnedJson);
 	console.log('\n');
 	//console.log('Status: ', returnedJson.response[]);
 	console.log('speech: ', speech);
 	console.log('\n');
 	console.log('Order#: ', returnedJson.response.salesorder[0].ordernumber);
+	console.log('\n');
+	console.log('Header#: ', returnedJson.response.salesorder[0].headerid);
 	//console.log('\n');
 	speech += 'New order# '+returnedJson.response.salesorder[0].ordernumber+'.';
-	speech +=' EBS action: ' + requestBody.result.action;
+	speech +=' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId='+returnedJson.response.salesorder[0].headerid;
 	
 return res.json({
             speech: speech,
@@ -254,8 +253,8 @@ function getOptionsPost(body,EBSFunctionName){
 
 
 function callCreateOrder(itemName,qty,tokenName,tokenValue,callBackLastOrders) {
-	
-    var body = '<params><param>1006</param><param>2626</param><param>1025</param><param>1026</param><param>1</param></params>';
+	  //itemName
+    var body = '<params><param>1006</param><param>2626</param><param>1025</param><param>1026</param><param>'+qty+'</param></params>';
     var returnxml;
     
     var reqPost = http.request(getOptionsPost(body,'ONT_REST_CREATE_ORDER'), function(res) {
