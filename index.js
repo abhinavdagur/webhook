@@ -48,8 +48,7 @@ restService.post('/hook', function (req, res) {
                 	 }else if (requestBody.result.action === 'team8-createorder'){
                 	 		processCreateOrder(requestBody.result.parameters.item_name,requestBody.result.parameters.quantity,function(returnedJson){
                 	 		console.log('result: ', returnedJson);
-                	  	 		//return res.json({returnedJson});
-                	  	 		return getJson(requestBody,res,speech,returnedJson);
+                	  	 		return getJson(requestBody,res,speech,returnedJson,requestBody.result.action);
                 	  	 });
                 	 }else if (requestBody.result.action === 'team8-cancelorder'){
                 	 }else if (requestBody.result.action === 'team8-queryorder'){
@@ -83,25 +82,29 @@ restService.post('/hook', function (req, res) {
     }
 });
 
-function getJson(requestBody,res,speech,returnedJson) {
+function getJson(requestBody,res,speech,returnedJson, action) {
+	if (action === 'team8-createorder'){
+		console.log('returnedJson: ', returnedJson);
+		console.log('\n');
+		//console.log('Status: ', returnedJson.response[]);
+		console.log('speech: ', speech);
+		console.log('\n');
+		console.log('Order#: ', returnedJson.response.salesorder[0].ordernumber);
+		console.log('\n');
+		console.log('Header#: ', returnedJson.response.salesorder[0].headerid);
+		//console.log('\n');
+		var llink =' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId='+returnedJson.response.salesorder[0].headerid;
+		var str = returnedJson.response.salesorder[0].ordernumber.toString();
+		var result = str.link(llink);
+		speech += 'New order# '+result;
 	
-	console.log('returnedJson: ', returnedJson);
-	console.log('\n');
-	//console.log('Status: ', returnedJson.response[]);
-	console.log('speech: ', speech);
-	console.log('\n');
-	console.log('Order#: ', returnedJson.response.salesorder[0].ordernumber);
-	console.log('\n');
-	console.log('Header#: ', returnedJson.response.salesorder[0].headerid);
-	//console.log('\n');
-	var llink =' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId='+returnedJson.response.salesorder[0].headerid;
-	var str = returnedJson.response.salesorder[0].ordernumber.toString();
-	var result = str.link(llink);
-	speech += 'New order# '+result;
-	
-	
-	
-	
+	}else if (action === 'team8-createorder'){
+	}else if (requestBody.result.action === 'team8-expediteorder'){
+                	 
+  }else if (requestBody.result.action === 'team8-expediteorder'){
+  }else if (requestBody.result.action === 'team8-expediteorder'){}
+                	 
+                	 
 	
 
 return res.json({
