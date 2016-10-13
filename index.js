@@ -229,12 +229,12 @@ function getJson(requestBody, res, speech, returnedJson, action) {
     	console.log('returnedJson: ', returnedJson);
     	console.log('response: ', returnedJson.response);
     	console.log('salesorders: ', returnedJson.response.salesorders[0]);
-    	speech = 'Orders created :'
+    	speech = 'Orders queried :'
     	for (var i = 0; i < returnedJson.response.salesorders[0].salesorder.length; i++) {
     		//console.log('ordernumber: ', returnedJson.response.salesorders[0].salesorder[i].ordernumber);
-    		speech += returnedJson.response.salesorders[0].salesorder[i].ordernumber+' ,';
+    		speech += returnedJson.response.salesorders[0].salesorder[i].ordernumber+' \n ';
 			}
-			speech = speech.substring(0, speech.length - 2)+'.';
+			//speech = speech.substring(0, speech.length - 2)+'.';
 
     } else if (requestBody.result.action === 'team8-expediteorder') {} else if (requestBody.result.action === 'team8-voidorder') {
         const status = returnedJson.response.salesorder[0].status;
@@ -251,7 +251,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         const orderedquantity = returnedJson.response.salesorders[0].salesorder[0].orderedquantity
         const ordertotal = returnedJson.response.salesorders[0].salesorder[0].ordertotal;
         const scheduledshipstate = returnedJson.response.salesorders[0].salesorder[0].scheduledshipstate;
-        speech = 'Order ' + orderNumber + ' contains ' + orderedquantity + ' units of ' + ordereditem + ' worth ' + ordertotal + ' is in status ' + orderstatus + ' and ready to be shipped on ' + scheduledshipstate;
+        speech = 'Order ' + orderNumber + ' contains ' + orderedquantity + ' unit(s) of ' + ordereditem + ' worth ' + ordertotal + ' is in status ' + orderstatus + ' and ready to be shipped on ' + scheduledshipstate;
         //Order 69384 contains 15 units of AMO-100 worth $1123.87 is ready to be shipped via FedEx on Oct 17, 2016.
     }
 
