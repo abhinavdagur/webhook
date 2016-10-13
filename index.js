@@ -94,9 +94,16 @@ function getJson(requestBody,res,speech,returnedJson) {
 	console.log('\n');
 	console.log('Header#: ', returnedJson.response.salesorder[0].headerid);
 	//console.log('\n');
-	speech += 'New order# '+returnedJson.response.salesorder[0].ordernumber+'.';
-	speech +=' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId='+returnedJson.response.salesorder[0].headerid;
+	var llink =' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId='+returnedJson.response.salesorder[0].headerid;
+	var str = returnedJson.response.salesorder[0].ordernumber.toString();
+	var result = str.link(llink);
+	speech += 'New order# '+result;
 	
+	
+	
+	
+	
+
 return res.json({
             speech: speech,
             displayText: speech,
