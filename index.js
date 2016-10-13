@@ -45,11 +45,26 @@ restService.post('/hook', function (req, res) {
                 	  	 		return res.json({returnedJson});
                 	  	 });	
                 	  	 
+                	  	 
                 	 }else if (requestBody.result.action === 'team8-createorder'){
-                	 		processCreateOrder(requestBody.result.parameters.item_name,requestBody.result.parameters.quantity,function(returnedJson){
-                	 		console.log('result: ', returnedJson);
+                	 		  const item = requestBody.result.parameters.item_name;
+											  const qty = requestBody.result.parameters.quantity;
+											  //console.log('qty: ', qty);
+											  //console.log('item: ', item);
+  											if (!item || !qty ) {  					
+  													    
+														return res.json({
+														            status: 'ok',
+														            incomplete: true
+														        });	
+  											}else{	
+
+                	 	
+                	 				processCreateOrder(item,qty,function(returnedJson){
+                	 		
                 	  	 		return getJson(requestBody,res,speech,returnedJson,requestBody.result.action);
-                	  	 });
+                	  			});
+                	  		}	
                 	 }else if (requestBody.result.action === 'team8-cancelorder'){
                 	 }else if (requestBody.result.action === 'team8-queryorder'){
                 	 }else if (requestBody.result.action === 'team8-queryfeworder'){
