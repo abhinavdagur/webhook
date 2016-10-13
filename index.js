@@ -40,17 +40,18 @@ restService.post('/hook', function(req, res) {
                 if (requestBody.result.action) {
                     //calling EBS WS
                     if (requestBody.result.action === 'team8-repeatorder') {
-                        const order = requestBody.result.parameters.order_number;
-                        console.log('order: ', order);
+												const order = requestBody.result.parameters.order_number;
+                        //console.log('qty: ', qty);
+                        //console.log('item: ', item);
                         if (!order) {
 
                             return res.json({
                                 status: 'ok',
                                 incomplete: true
                             });
-                        } else {
-                            processRepeatOrder(order, function(returnedJson) {
-                                return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
+                        } else {                    	
+                        			processRepeatOrder(order, function(returnedJson) {
+                            return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
                             });
                         }
 
@@ -58,8 +59,8 @@ restService.post('/hook', function(req, res) {
                     } else if (requestBody.result.action === 'team8-createorder') {
                         const item = requestBody.result.parameters.item_name;
                         const qty = requestBody.result.parameters.quantity;
-                        console.log('qty: ', qty);
-                        console.log('item: ', item);
+                        //console.log('qty: ', qty);
+                        //console.log('item: ', item);
                         if (!item || !qty) {
 
                             return res.json({
@@ -74,7 +75,7 @@ restService.post('/hook', function(req, res) {
                                 return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
                             });
                         }
-                    } else if (requestBody.result.action === 'team8-cancelorder') {
+                    } else if (requestBody.result.action === 'team8-voidorder') {
                         const orderNumber = requestBody.result.parameters.order_number;
                         if (!orderNumber) {
 
@@ -94,7 +95,7 @@ restService.post('/hook', function(req, res) {
                         //END CKASERA
 
                     } else if (requestBody.result.action === 'team8-queryorder') {
-                        const orderNumber = requestBody.result.parameters.order_number;
+												const orderNumber = requestBody.result.parameters.order_number;
                         if (!orderNumber) {
 
                             return res.json({
@@ -111,27 +112,27 @@ restService.post('/hook', function(req, res) {
                             });
                         }
                         //END CKASERA                    	
-
-
-                    } else if (requestBody.result.action === 'team8-queryfeworder') {
-                        const count = requestBody.result.parameters.count;
+                    
+                    
+                    }else if (requestBody.result.action === 'team8-queryfeworder') {
+                    const count = requestBody.result.parameters.count;
                         const cName = requestBody.result.parameters.customer_name;
-                        console.log('count: ', count);
-                        console.log('cName: ', cName);
+                        //console.log('qty: ', qty);
+                        //console.log('item: ', item);
                         if (!count || !cName) {
 
                             return res.json({
                                 status: 'ok',
                                 incomplete: true
                             });
-                        } else {
-
-                            processFewOrders(count, cName, function(returnedJson) {
-                                console.log('result: ', returnedJson);
-                                return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
-                            });
-
-                        }
+                        } else {	
+                    	
+                        	processFewOrders(count,cName , function(returnedJson) {
+                            console.log('result: ', returnedJson);
+                            return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
+                        	});
+                        
+                      	}
 
 
                     } else if (requestBody.result.action === 'team8-expediteorder') {
@@ -158,6 +159,21 @@ restService.post('/hook', function(req, res) {
 });
 
 function getJson(requestBody, res, speech, returnedJson, action) {
+	
+	/*const options = {
+    method: 'POST',
+    url: 'http://cass-dev.theiotlabs.com/parse/functions/sendEmail',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    timeout: 10 * 60 * 1000,
+    json: {
+      email,
+      subject,
+      message
+    }
+  };*/
+  
     if (action === 'team8-createorder') {
         console.log('returnedJson: ', returnedJson);
         console.log('\n');
@@ -175,7 +191,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
 
     } else if (action === 'team8-createorder') {} else if (requestBody.result.action === 'team8-expediteorder') {
 
-    } else if (requestBody.result.action === 'team8-expediteorder') {} else if (requestBody.result.action === 'team8-cancelorder') {}
+    } else if (requestBody.result.action === 'team8-expediteorder') {} else if (requestBody.result.action === 'team8-voidorder') {}
 
 
 
@@ -514,7 +530,7 @@ function processQueryOrder(orderNumber, callback) {
 
 function callQueryOrder(tokenName, tokenValue, orderNumber, processQueryOrder) {
     console.log('in func callQueryOrder');
-    var body = '<params>' + orderNumber + '</params>';
+    var body = '<params><params>' + orderNumber + '</params></params>';
     var returnxml;
     console.log('calling getOptionsPost');
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_GET_ORDER'), function(res) {
