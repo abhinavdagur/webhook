@@ -528,9 +528,9 @@ function callCreateOrder(itemName, qty, tokenName, tokenValue, callBackLastOrder
     var itemId = 2626;
     
     
-    if (itemName.includes('iphone')){
+    if (itemName.toLowerCase().includes('iphone')){
     	itemId = 750038;
-    }	else if (itemName.includes('note')){
+    }	else if (itemName.toLowerCase().includes('note')){
     	itemId = 750039;
     }
     	
