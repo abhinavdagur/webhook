@@ -320,12 +320,17 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         //console.log('Order#: ', returnedJson.response.salesorders[0].salesorder);
         //console.log('Order#: ', returnedJson.response.salesorders[0].salesorder[0].ordernumber);
         const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
+        const headerId = returnedJson.response.salesorders[0].salesorder[0].headerid;
         const orderstatus = returnedJson.response.salesorders[0].salesorder[0].orderstatus;
         const ordereditem = returnedJson.response.salesorders[0].salesorder[0].ordereditem;
         const orderedquantity = returnedJson.response.salesorders[0].salesorder[0].orderedquantity
         const ordertotal = returnedJson.response.salesorders[0].salesorder[0].ordertotal;
         const scheduledshipstate = returnedJson.response.salesorders[0].salesorder[0].scheduledshipstate;
-        speech = 'Order ' + orderNumber + ' contains ' + orderedquantity + ' unit(s) of ' + ordereditem + ' worth ' + ordertotal + ' is in status ' + orderstatus + ' and ready to be shipped on ' + scheduledshipstate;
+        var llink = ' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId=' + headerId;
+        //console.log('llink: ', llink);
+        speech = 'Order ' + orderNumber + ' contains ' + orderedquantity + ' unit(s) of ' + ordereditem + ' worth ' + ordertotal + ' is in status ' + orderstatus + ' and ready to be shipped on ' + scheduledshipstate+ ' \n '+
+               llink+' \n\n';
+        
         //Order 69384 contains 15 units of AMO-100 worth $1123.87 is ready to be shipped via FedEx on Oct 17, 2016.
     }
 
