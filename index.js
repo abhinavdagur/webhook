@@ -297,6 +297,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
 						var llink = ' http://rws3220164.us.oracle.com:8003/OA_HTML/OA.jsp?OAFunc=ONT_PORTAL_ORDERDETAILS&HeaderId=' + returnedJson.response.salesorders[0].salesorder[i].headerid;
             speech += 'Order Number: ' + returnedJson.response.salesorders[0].salesorder[i].ordernumber +
                 ' Quantity: ' + returnedJson.response.salesorders[0].salesorder[i].orderedquantity +
+                ' Item: ' + returnedJson.response.salesorders[0].salesorder[i].ordereditem +
                 ' Schedule Ship Date: ' + returnedJson.response.salesorders[0].salesorder[i].scheduledshipstate +
                 ' Schedule Arrival Date: ' + returnedJson.response.salesorders[0].salesorder[i].scheduledarrivaldate +
                 ' Total Amount: ' + returnedJson.response.salesorders[0].salesorder[i].ordertotal +
