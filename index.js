@@ -185,35 +185,27 @@ restService.post('/hook', function(req, res) {
 function sendEmail(subject, message, email) {
 
     console.log('Sending email');
-    var emailTxt = {
-        'email': email,
-        'subject': subject,
-        'message': 'TEST'
-    }
-
-    console.log('set options and call request ');
-    var postheaders = {
-        'content-type': 'application/json',
-        'Cache-Control': 'no-cache'
-    }
 
     const options = {
-        method: 'POST',
-        url: 'http://cass-dev.theiotlabs.com/parse/functions/sendEmail',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        timeout: 10 * 60 * 1000,
-        emailTxt
-    };
+    method: 'POST',
+    url: 'http://cass-dev.theiotlabs.com/parse/functions/sendEmail',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    timeout: 10 * 60 * 1000,
+    json: {
+      email,
+      subject,
+      message
+    }
+  };
     var res = request(options, (error, response, body) => {
-        /*callback.setHeader('Content-Type', 'application/json');
-        const result = {
-          status: 'ok',
-          incomplete: false,
-          speech: 'email sent!'
-        };*/
-
+    	 if(error){
+            console.log(error);
+        }else{
+        		console.log(error);
+            console.log('Message sent: ' + response);
+        };
         console.log('returned result' + response + error + body);
         //return callback(response);
         return;
@@ -227,7 +219,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
 
     //if ((action == 'team8-createorder') ||
     //   (action == 'team8-expediteorder')) {
-    const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
+    //const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
     var subject;
     if (action === 'team8-createorder') {
         subject = 'Order Placed';
@@ -235,6 +227,9 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         subject = 'Order Expedited';
     }
     const message = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.messageOriginal;
+    
+  const email = req.body.result.parameters.email;
+    
 
 
     if (action === 'team8-createorder') {
@@ -251,11 +246,12 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         var str = returnedJson.response.salesorder[0].ordernumber.toString();
         var result = str.link(llink);
         speech += 'New order# ' + result;
-
+				message = speech;
         sendEmail(subject, message, email);
 
     } else if (requestBody.result.action === 'team8-expediteorder') {
 
+        message = speech;
         sendEmail(subject, message, email);
     } else if (requestBody.result.action === 'team8-queryfeworder') {
         //const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
