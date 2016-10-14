@@ -272,7 +272,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
      message = 'Hi '+requestBody.result.patContexts.currentUser.firstName+', \n'; //requestBody.result.parameters.messageOriginal;
     
   	email = requestBody.result.patContexts.currentUser.email;
-  	phone = requestBody.result.patContexts.currentUser.email;
+  	phone = requestBody.result.patContexts.currentUser.phone;
 		}
 
  
