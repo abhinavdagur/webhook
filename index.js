@@ -244,7 +244,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         subject = 'Order Expedited';
     }
     if (requestBody.result.patContexts){
-    message = 'Hi '+requestBody.result.patContexts.currentUser.firstName+' \n'; //requestBody.result.parameters.messageOriginal;
+    message = 'Hi '+requestBody.result.patContexts.currentUser.firstName+', \n'; //requestBody.result.parameters.messageOriginal;
     
   	email = requestBody.result.patContexts.currentUser.email;
 		}
@@ -501,7 +501,7 @@ function callCreateOrder(itemName, qty, tokenName, tokenValue, callBackLastOrder
     }
     	
     	
-    var body = '<params><param>1006</param><param>'+itemId+'</param><param>1025</param><param>1026</param><param>' + qty + '</param></params>';
+    var body = '<params><param>1005</param><param>'+itemId+'</param><param>1025</param><param>1026</param><param>' + qty + '</param></params>';
     var returnxml;
 
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_CREATE_ORDER'), function(res) {
