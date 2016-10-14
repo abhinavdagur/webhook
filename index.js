@@ -11,6 +11,7 @@ var password = 'welcome';
 var reqPost;
 var tokenName;
 var tokenValue;
+var orderNumberExpedite;
 var xml2js = require('xml2js');
 //EBS WS changes End
 
@@ -161,6 +162,7 @@ restService.post('/hook', function(req, res) {
                             
 
                             console.log('#expediteOrders days: ', days);
+                            orderNumberExpedite = order_number;
                             expediteOrders(days, order_number, function(returnedJson) {
                                 console.log('result: ', returnedJson);
                                 return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
@@ -283,7 +285,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         if (!('S' == status)) {
             speech = 'Order cannot be expedited. Please contact customer support. ';
         }           
-        message += speech+'\n\n';
+        message += 'Expedition request for the order# '+orderNumberExpedite+' has been placed. \n \n';
         message +=' Thank you! \n';
 				message +=' Enterprise Bot Service';
         sendEmail(subject, message, email);
