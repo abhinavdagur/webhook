@@ -137,7 +137,9 @@ restService.post('/hook', function(req, res) {
                         
                         if (!edays.includes('days')){
                         	edays = null;
-                      	}
+                      	}else{
+                      		edays = edays.substring(0, edays.indexOf(' '));
+                      	}	
                         if (!edays || !order_number) {
 
                             return res.json({
@@ -187,26 +189,13 @@ restService.post('/hook', function(req, res) {
     }
 });
 
-function days_between(date1, date2) {
-
-    // The number of milliseconds in one day
-    var ONE_DAY = 1000 * 60 * 60 * 24;
-
-    // Convert both dates to milliseconds
-    var date1_ms = date1.getTime();
-    var date2_ms = date2.getTime();
-
-    // Calculate the difference in milliseconds
-    var difference_ms = Math.abs(date1_ms - date2_ms);
-
-    // Convert back to days and return
-    return Math.round(difference_ms/ONE_DAY);
-
-}
 
 
 function sendEmail(subject, message, email) {
-
+	
+	console.log('sending email to :'+email);
+	
+	if (subject && message && email){
     console.log('Sending email');
 
     const options = {
@@ -223,7 +212,7 @@ function sendEmail(subject, message, email) {
     }
   };
   	
-  	console.log('sending email to :'+email);
+  	
     var res = request(options, (error, response, body) => {
     	 if(error){
             console.log(error);
@@ -236,12 +225,15 @@ function sendEmail(subject, message, email) {
         return;
 
     });
+    
+  }  
 
 }
 
 function getJson(requestBody, res, speech, returnedJson, action) {
     console.log('action :' + action);
-
+		var email;
+		var message;
     //if ((action == 'team8-createorder') ||
     //   (action == 'team8-expediteorder')) {
     //const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
@@ -251,10 +243,13 @@ function getJson(requestBody, res, speech, returnedJson, action) {
     } else {
         subject = 'Order Expedited';
     }
-    var message = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.messageOriginal;
+    if (requestBody.result.patContexts){
+    message = 'Hi '+requestBody.result.patContexts.currentUser.firstName; //requestBody.result.parameters.messageOriginal;
     
-  const email = requestBody.result.parameters.email;
-    
+  	email = requestBody.result.patContexts.currentUser.email;
+		}
+
+ 
 
 
     if (action === 'team8-createorder') {
@@ -271,12 +266,20 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         var str = returnedJson.response.salesorder[0].ordernumber.toString();
         var result = str.link(llink);
         speech += 'New order# ' + result;
-				message = speech;
+				message += speech;
         sendEmail(subject, message, email);
 
     } else if (requestBody.result.action === 'team8-expediteorder') {
 
-        message = speech;
+				console.log('Order#: ', returnedJson.response);
+    		console.log('Order#: ', returnedJson.response.salesorder);
+    		console.log('Order#: ', returnedJson.response.salesorder[0]);
+    		console.log('Order#: ', returnedJson.response.salesorder[0].status);
+				const status = returnedJson.response.salesorder[0].status;
+        if (!('S' == status)) {
+            speech = 'Order cannot be expedited. Please contact customer support. ';
+        }           
+        message += speech;
         sendEmail(subject, message, email);
     } else if (requestBody.result.action === 'team8-queryfeworder') {
         //const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
@@ -297,7 +300,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         }
         //speech = speech.substring(0, speech.length - 2)+'.';
 
-    } else if (requestBody.result.action === 'team8-expediteorder') {} else if (requestBody.result.action === 'team8-voidorder') {
+    } else if (requestBody.result.action === 'team8-voidorder') {
         const status = returnedJson.response.salesorder[0].status;
         if (!('S' == status)) {
             speech = 'Order cannot be cancelled. Please contact customer support. ';
