@@ -132,29 +132,37 @@ restService.post('/hook', function(req, res) {
 
 
                     } else if (requestBody.result.action === 'team8-expediteorder') {
-                        const edate = requestBody.result.parameters.date;
+                        var edays = requestBody.result.parameters.date;
                         const order_number = requestBody.result.parameters.order_number;
-                        if (!edate || !order_number) {
+                        
+                        if (!edays.includes('days')){
+                        	edays = null;
+                      	}
+                        if (!edays || !order_number) {
 
                             return res.json({
                                 status: 'ok',
                                 incomplete: true
                             });
                         } else {
-                            var newDate;
-                            if (edate.includes('days')) {
-                                var date = new Date();
-                                newDate = new Date(date.setTime(date.getTime() + edate.substring(0, edate.indexOf(' ')) * 86400000));
-                            } else {
-                                newDate = edate;
+                            var days;
+                            //if (edays.includes('days')) {
+                                days = edays;
+                                //newDate = new Date(date.setTime(date.getTime() + edays.substring(0, edays.indexOf(' ')) * 86400000));
+                            /*} else {
+                            	  var  date = new Date();
+                            	  console.log('#expediteOrders current date : ', date);
+                            	  console.log('#expediteOrders edays: ', edays);
+                            	  days = days_between(date,edays);
+                            	  console.log('#expediteOrders days: ', days);
+                            }*/
+                            
 
-                            }
-
-                            console.log('#expediteOrders Date: ', newDate);
-                            /*expediteOrders(newDate, order_number, function(returnedJson) {
+                            console.log('#expediteOrders days: ', days);
+                            expediteOrders(days, order_number, function(returnedJson) {
                                 console.log('result: ', returnedJson);
                                 return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
-                            });*/
+                            });
 
                         }
 
@@ -179,7 +187,22 @@ restService.post('/hook', function(req, res) {
     }
 });
 
+function days_between(date1, date2) {
 
+    // The number of milliseconds in one day
+    var ONE_DAY = 1000 * 60 * 60 * 24;
+
+    // Convert both dates to milliseconds
+    var date1_ms = date1.getTime();
+    var date2_ms = date2.getTime();
+
+    // Calculate the difference in milliseconds
+    var difference_ms = Math.abs(date1_ms - date2_ms);
+
+    // Convert back to days and return
+    return Math.round(difference_ms/ONE_DAY);
+
+}
 
 
 function sendEmail(subject, message, email) {
@@ -199,6 +222,8 @@ function sendEmail(subject, message, email) {
       message
     }
   };
+  	
+  	console.log('sending email to :'+email);
     var res = request(options, (error, response, body) => {
     	 if(error){
             console.log(error);
@@ -226,9 +251,9 @@ function getJson(requestBody, res, speech, returnedJson, action) {
     } else {
         subject = 'Order Expedited';
     }
-    const message = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.messageOriginal;
+    var message = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.messageOriginal;
     
-  const email = req.body.result.parameters.email;
+  const email = requestBody.result.parameters.email;
     
 
 
@@ -674,10 +699,10 @@ function callQueryOrder(tokenName, tokenValue, orderNumber, processQueryOrder) {
 }
 
 
-function expediteOrders(inputDate, orderNumber, callback) {
+function expediteOrders(days, orderNumber, callback) {
     getAccessToken(function(tokenName, tokenValue) {
 
-        callExpediteOrders(tokenName, tokenValue, inputDate, orderNumber, function(inputXml) {
+        callExpediteOrders(tokenName, tokenValue, days, orderNumber, function(inputXml) {
 
             console.log("inputXml :" + inputXml);
             var parser = new xml2js.Parser();
@@ -696,12 +721,12 @@ function expediteOrders(inputDate, orderNumber, callback) {
     })
 }
 
-function callExpediteOrders(tokenName, tokenValue, inputDate, orderNumber, processQueryOrder) {
+function callExpediteOrders(tokenName, tokenValue, days, orderNumber, processQueryOrder) {
     console.log('in func callExpediteOrders');
-    var body = '<params><param>' + orderNumber + '</param></params>';
+    var body = '<params><param>' + orderNumber + '</param><param>' + days + '</param></params>';
     var returnxml;
     console.log('calling getOptionsPost');
-    var reqPost = http.request(getOptionsPost(body, 'ONT_REST_GET_ORDER'), function(res) {
+    var reqPost = http.request(getOptionsPost(body, 'ONT_REST_UPDATE_ORDER'), function(res) {
 
         //console.log("POST headers: ", res.headers);
         console.log(" POST statusCode in callExpediteOrders: ", res.statusCode);
