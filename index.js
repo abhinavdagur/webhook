@@ -508,7 +508,7 @@ function callCreateOrder(itemName, qty, tokenName, tokenValue, callBackLastOrder
     }
     	
     	
-    var body = '<params><param>1005</param><param>'+itemId+'</param><param>1025</param><param>1026</param><param>' + qty + '</param></params>';
+    var body = '<params><param>1005</param><param>'+itemId+'</param><param>1023</param><param>1024</param><param>' + qty + '</param></params>';
     var returnxml;
 
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_CREATE_ORDER'), function(res) {
