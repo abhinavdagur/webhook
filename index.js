@@ -85,14 +85,12 @@ restService.post('/hook', function(req, res) {
                             });
                         } else {
 
-
-                            //START CKASERA
                             processCancelOrders(orderNumber, function(returnedJson) {
                                 console.log('result for processCancelOrders: ', returnedJson);
                                 return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
                             });
                         }
-                        //END CKASERA
+
 
                     } else if (requestBody.result.action === 'team8-queryorder') {
                         const orderNumber = requestBody.result.parameters.order_number;
@@ -117,8 +115,6 @@ restService.post('/hook', function(req, res) {
                     } else if (requestBody.result.action === 'team8-queryfeworder') {
                         const count = requestBody.result.parameters.count;
                         const cName = requestBody.result.parameters.customer_name;
-                        //console.log('qty: ', qty);
-                        //console.log('item: ', item);
                         if (!count) {
 
                             return res.json({
@@ -136,6 +132,31 @@ restService.post('/hook', function(req, res) {
 
 
                     } else if (requestBody.result.action === 'team8-expediteorder') {
+                        const edate = requestBody.result.parameters.date;
+                        const order_number = requestBody.result.parameters.order_number;
+                        if (!edate || !order_number) {
+
+                            return res.json({
+                                status: 'ok',
+                                incomplete: true
+                            });
+                        } else {
+                            var newDate;
+                            if (edate.includes('days')) {
+                                var date = new Date();
+                                newDate = new Date(date.setTime(date.getTime() + edate.substring(0, edate.indexOf(' ')) * 86400000));
+                            } else {
+                                newDate = edate;
+
+                            }
+
+                            console.log('#expediteOrders Date: ', newDate);
+                            /*expediteOrders(newDate, order_number, function(returnedJson) {
+                                console.log('result: ', returnedJson);
+                                return getJson(requestBody, res, speech, returnedJson, requestBody.result.action);
+                            });*/
+
+                        }
 
                     }
 
@@ -158,55 +179,64 @@ restService.post('/hook', function(req, res) {
     }
 });
 
+
+
+
+function sendEmail(subject, message, email) {
+
+    console.log('Sending email');
+    var emailTxt = {
+        'email': email,
+        'subject': subject,
+        'message': 'TEST'
+    }
+
+    console.log('set options and call request ');
+    var postheaders = {
+        'content-type': 'application/json',
+        'Cache-Control': 'no-cache'
+    }
+
+    const options = {
+        method: 'POST',
+        url: 'http://cass-dev.theiotlabs.com/parse/functions/sendEmail',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        timeout: 10 * 60 * 1000,
+        emailTxt
+    };
+    var res = request(options, (error, response, body) => {
+        /*callback.setHeader('Content-Type', 'application/json');
+        const result = {
+          status: 'ok',
+          incomplete: false,
+          speech: 'email sent!'
+        };*/
+
+        console.log('returned result' + response + error + body);
+        //return callback(response);
+        return;
+
+    });
+
+}
+
 function getJson(requestBody, res, speech, returnedJson, action) {
     console.log('action :' + action);
-    /*restService.use('/sendEmail.json', (req, res) => {
-        if ((action == 'team8-createorder') ||
-            (action == 'team8-expediteorder')) {
-            const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
-            var subject;
-            if (action === 'team8-createorder') {
-                subject = 'Order Placed';
-            } else {
-                subject = 'Order Expedited';
-            }
-            const message = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.messageOriginal;
+
+    //if ((action == 'team8-createorder') ||
+    //   (action == 'team8-expediteorder')) {
+    const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
+    var subject;
+    if (action === 'team8-createorder') {
+        subject = 'Order Placed';
+    } else {
+        subject = 'Order Expedited';
+    }
+    const message = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.messageOriginal;
 
 
-            //if (email && message) {
-                console.log('Sending email');
-                const options = {
-                    method: 'POST',
-                    url: 'http://cass-dev.theiotlabs.com/parse/functions/sendEmail',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 10 * 60 * 1000,
-                    json: {
-                        email,
-                        subject,
-                        message
-                    }
-                };
-                console.log('set options and call request ');
-                request(options, (error, response, body) => {
-                    res.setHeader('Content-Type', 'application/json');
-                    const result = {
-                      status: 'ok',
-                      incomplete: false,
-                      speech: 'email sent!'
-                    };
-                    console.log('returned result');
-                    res.json(result);
-                    console.log('error: ' + error);
-                    console.log('error: ' + response);
-                    console.log('error: ' + body);
-                    console.log('set options and call request ');
-                });
-
-            //}
-        }
-    });*/
     if (action === 'team8-createorder') {
         console.log('returnedJson: ', returnedJson);
         console.log('\n');
@@ -222,26 +252,29 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         var result = str.link(llink);
         speech += 'New order# ' + result;
 
+        sendEmail(subject, message, email);
+
     } else if (requestBody.result.action === 'team8-expediteorder') {
 
+        sendEmail(subject, message, email);
     } else if (requestBody.result.action === 'team8-queryfeworder') {
-    	//const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
-    	console.log('returnedJson: ', returnedJson);
-    	console.log('response: ', returnedJson.response);
-    	console.log('salesorders: ', returnedJson.response.salesorders[0]);
-    	speech = 'Orders queried :'+' \n ';
-    	for (var i = 0; i < returnedJson.response.salesorders[0].salesorder.length; i++) {
-    		
-    		speech += 'Order Number: '+returnedJson.response.salesorders[0].salesorder[i].ordernumber+
-    		' Quantity: '+returnedJson.response.salesorders[0].salesorder[i].orderedquantity+
-    		' Schedule Ship Date: '+returnedJson.response.salesorders[0].salesorder[i].scheduledshipstate+
-    		' Schedule Arrival Date: '+returnedJson.response.salesorders[0].salesorder[i].scheduledarrivaldate+
-    		' Total Amount: '+returnedJson.response.salesorders[0].salesorder[i].ordertotal+
-    		' Status: '+returnedJson.response.salesorders[0].salesorder[i].orderstatus+' \n ';
-    		//console.log('ordernumber: ', returnedJson.response.salesorders[0].salesorder[i].ordernumber);
-    		//speech += returnedJson.response.salesorders[0].salesorder[i].ordernumber+' \n ';
-			}
-			//speech = speech.substring(0, speech.length - 2)+'.';
+        //const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
+        console.log('returnedJson: ', returnedJson);
+        console.log('response: ', returnedJson.response);
+        console.log('salesorders: ', returnedJson.response.salesorders[0]);
+        speech = 'Orders queried :' + ' \n ';
+        for (var i = 0; i < returnedJson.response.salesorders[0].salesorder.length; i++) {
+
+            speech += 'Order Number: ' + returnedJson.response.salesorders[0].salesorder[i].ordernumber +
+                ' Quantity: ' + returnedJson.response.salesorders[0].salesorder[i].orderedquantity +
+                ' Schedule Ship Date: ' + returnedJson.response.salesorders[0].salesorder[i].scheduledshipstate +
+                ' Schedule Arrival Date: ' + returnedJson.response.salesorders[0].salesorder[i].scheduledarrivaldate +
+                ' Total Amount: ' + returnedJson.response.salesorders[0].salesorder[i].ordertotal +
+                ' Status: ' + returnedJson.response.salesorders[0].salesorder[i].orderstatus + ' \n ';
+            //console.log('ordernumber: ', returnedJson.response.salesorders[0].salesorder[i].ordernumber);
+            //speech += returnedJson.response.salesorders[0].salesorder[i].ordernumber+' \n ';
+        }
+        //speech = speech.substring(0, speech.length - 2)+'.';
 
     } else if (requestBody.result.action === 'team8-expediteorder') {} else if (requestBody.result.action === 'team8-voidorder') {
         const status = returnedJson.response.salesorder[0].status;
@@ -263,7 +296,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
     }
 
 
-
+    console.log('Final: ', speech);
 
     return res.json({
         speech: speech,
@@ -287,7 +320,7 @@ function processFewOrders(count, customerName, callback) {
             var parser = new xml2js.Parser();
 
             parser.parseString(inputXml, function(err, result) {
-console.log("result :" + result);
+                console.log("result :" + result);
                 //return callback(JSON.stringify(result));
                 return callback(result);
 
@@ -497,21 +530,21 @@ function callQueryLastOrders(tokenName, tokenValue, days, callBackLastOrders) {
 
         //console.log("POST headers: ", res.headers);
         console.log(" POST statusCode: ", res.statusCode);
-				var counter = 0;
+        var counter = 0;
         res.on('data', function(d) {
-        		counter++;
+            counter++;
             //console.info('POST result:\n');
             process.stdout.write(d);
-            
+
             if (counter == 1) {
-            	returnxml = d;
-          	}	else{
-          		returnxml += d;
-          		console.log(" $$$$$returnxml : ", returnxml);
+                returnxml = d;
+            } else {
+                returnxml += d;
+                console.log(" $$$$$returnxml : ", returnxml);
             }
             console.log(" calling : ", counter);
-            
-            
+
+
             //return callBackLastOrders(d);
             //returnxml = '<response status="200"><salesorders><salesorder><ordernumber>69403</ordernumber><headerid>361378</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>1</orderedquantity><ordertotal>415 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder><salesorder><ordernumber>69402</ordernumber><headerid>361377</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>1</orderedquantity><ordertotal>415 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder><salesorder><ordernumber>69401</ordernumber><headerid>361376</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>4</orderedquantity><ordertotal>1660 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder></salesorders></response>';
             //console.log(" returnxml: ", returnxml);
@@ -620,6 +653,62 @@ function callQueryOrder(tokenName, tokenValue, orderNumber, processQueryOrder) {
 
         //console.log("POST headers: ", res.headers);
         console.log(" POST statusCode in callQueryOrder: ", res.statusCode);
+
+        res.on('data', function(d) {
+            console.info('POST result:\n');
+            //process.stdout.write(d);
+            returnxml = d;
+            //console.info('\n\nPOST completed');
+        });
+
+        res.on('end', () => {
+            if (res.statusCode == '200') {
+                return processQueryOrder(returnxml);
+            }
+
+        });
+    });
+    console.info('after POST body' + body);
+    // write the xml data
+    reqPost.write(body);
+    reqPost.end();
+    reqPost.on('error', function(e) {
+        console.error(e);
+    });
+}
+
+
+function expediteOrders(inputDate, orderNumber, callback) {
+    getAccessToken(function(tokenName, tokenValue) {
+
+        callExpediteOrders(tokenName, tokenValue, inputDate, orderNumber, function(inputXml) {
+
+            console.log("inputXml :" + inputXml);
+            var parser = new xml2js.Parser();
+
+            parser.parseString(inputXml, function(err, result) {
+
+                //return callback(JSON.stringify(result));
+                return callback(result);
+
+
+            });
+
+
+        });
+
+    })
+}
+
+function callExpediteOrders(tokenName, tokenValue, inputDate, orderNumber, processQueryOrder) {
+    console.log('in func callExpediteOrders');
+    var body = '<params><param>' + orderNumber + '</param></params>';
+    var returnxml;
+    console.log('calling getOptionsPost');
+    var reqPost = http.request(getOptionsPost(body, 'ONT_REST_GET_ORDER'), function(res) {
+
+        //console.log("POST headers: ", res.headers);
+        console.log(" POST statusCode in callExpediteOrders: ", res.statusCode);
 
         res.on('data', function(d) {
             console.info('POST result:\n');
