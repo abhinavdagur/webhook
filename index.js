@@ -229,10 +229,17 @@ function getJson(requestBody, res, speech, returnedJson, action) {
     	console.log('returnedJson: ', returnedJson);
     	console.log('response: ', returnedJson.response);
     	console.log('salesorders: ', returnedJson.response.salesorders[0]);
-    	speech = 'Orders queried :'
+    	speech = 'Orders queried :'+' \n ';
     	for (var i = 0; i < returnedJson.response.salesorders[0].salesorder.length; i++) {
+    		
+    		speech += 'Order Number: '+returnedJson.response.salesorders[0].salesorder[i].ordernumber+
+    		' Quantity: '+returnedJson.response.salesorders[0].salesorder[i].orderedquantity+
+    		' Schedule Ship Date: '+returnedJson.response.salesorders[0].salesorder[i].scheduledshipstate+
+    		' Schedule Arrival Date: '+returnedJson.response.salesorders[0].salesorder[i].scheduledarrivaldate+
+    		' Total Amount: '+returnedJson.response.salesorders[0].salesorder[i].ordertotal+
+    		' Status: '+returnedJson.response.salesorders[0].salesorder[i].orderstatus+' \n ';
     		//console.log('ordernumber: ', returnedJson.response.salesorders[0].salesorder[i].ordernumber);
-    		speech += returnedJson.response.salesorders[0].salesorder[i].ordernumber+' \n ';
+    		//speech += returnedJson.response.salesorders[0].salesorder[i].ordernumber+' \n ';
 			}
 			//speech = speech.substring(0, speech.length - 2)+'.';
 
@@ -490,13 +497,23 @@ function callQueryLastOrders(tokenName, tokenValue, days, callBackLastOrders) {
 
         //console.log("POST headers: ", res.headers);
         console.log(" POST statusCode: ", res.statusCode);
-
+				var counter = 0;
         res.on('data', function(d) {
+        		counter++;
             //console.info('POST result:\n');
             process.stdout.write(d);
             
+            if (counter == 1) {
+            	returnxml = d;
+          	}	else{
+          		returnxml += d;
+          		console.log(" $$$$$returnxml : ", returnxml);
+            }
+            console.log(" calling : ", counter);
+            
+            
             //return callBackLastOrders(d);
-            returnxml = '<response status="200"><salesorders><salesorder><ordernumber>69403</ordernumber><headerid>361378</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>1</orderedquantity><ordertotal>415 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder><salesorder><ordernumber>69402</ordernumber><headerid>361377</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>1</orderedquantity><ordertotal>415 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder><salesorder><ordernumber>69401</ordernumber><headerid>361376</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>4</orderedquantity><ordertotal>1660 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder></salesorders></response>';
+            //returnxml = '<response status="200"><salesorders><salesorder><ordernumber>69403</ordernumber><headerid>361378</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>1</orderedquantity><ordertotal>415 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder><salesorder><ordernumber>69402</ordernumber><headerid>361377</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>1</orderedquantity><ordertotal>415 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder><salesorder><ordernumber>69401</ordernumber><headerid>361376</headerid><creationdate>13-OCT-2016</creationdate><fulfillmentdate>null</fulfillmentdate><scheduledshipstate>13-OCT-2016</scheduledshipstate><scheduledarrivaldate>13-OCT-2016</scheduledarrivaldate><ordereditem>ASO0024</ordereditem><orderedquantity>4</orderedquantity><ordertotal>1660 USD</ordertotal><orderstatus>Entered</orderstatus></salesorder></salesorders></response>';
             //console.log(" returnxml: ", returnxml);
             //console.info('\n\nPOST completed');
         });
