@@ -191,7 +191,29 @@ restService.post('/hook', function(req, res) {
     }
 });
 
+function sendMessage(phone, message) {
 
+console.log('sending message to :'+phone);
+	if (phone && message ){
+		
+  const options = {
+    method: 'POST',
+    url: 'http://cass-dev.theiotlabs.com/parse/functions/sendSms',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    timeout: 10 * 60 * 1000,
+    json: {
+      phone: phone,
+      message: message
+    }
+  };
+  request(options, (error, response, body) => {
+    console.log('returned result');
+  });
+  
+	}
+}
 
 function sendEmail(subject, message, email) {
 	
@@ -236,6 +258,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
     console.log('action :' + action);
 		var email;
 		var message;
+		var phone;
     //if ((action == 'team8-createorder') ||
     //   (action == 'team8-expediteorder')) {
     //const email = 'abhinav.dagur@oracle.com'; //requestBody.result.parameters.email;
@@ -246,9 +269,10 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         subject = 'Order Expedited';
     }
     if (requestBody.result.patContexts){
-    message = 'Hi '+requestBody.result.patContexts.currentUser.firstName+', \n'; //requestBody.result.parameters.messageOriginal;
+     message = 'Hi '+requestBody.result.patContexts.currentUser.firstName+', \n'; //requestBody.result.parameters.messageOriginal;
     
   	email = requestBody.result.patContexts.currentUser.email;
+  	phone = requestBody.result.patContexts.currentUser.email;
 		}
 
  
@@ -274,6 +298,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
 				message +=' Thank you! \n';
 				message +=' Enterprise Bot Service';
         sendEmail(subject, message, email);
+        sendMessage(phone, message);
 
     } else if (requestBody.result.action === 'team8-expediteorder') {
 
@@ -289,6 +314,8 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         message +=' Thank you! \n';
 				message +=' Enterprise Bot Service';
         sendEmail(subject, message, email);
+        sendMessage(phone, message);
+        
     } else if (requestBody.result.action === 'team8-queryfeworder') {
         //const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
         console.log('returnedJson: ', returnedJson);
