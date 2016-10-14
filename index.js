@@ -244,7 +244,7 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         subject = 'Order Expedited';
     }
     if (requestBody.result.patContexts){
-    message = 'Hi '+requestBody.result.patContexts.currentUser.firstName; //requestBody.result.parameters.messageOriginal;
+    message = 'Hi '+requestBody.result.patContexts.currentUser.firstName+' \n'; //requestBody.result.parameters.messageOriginal;
     
   	email = requestBody.result.patContexts.currentUser.email;
 		}
@@ -266,7 +266,10 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         var str = returnedJson.response.salesorder[0].ordernumber.toString();
         var result = str.link(llink);
         speech += 'New order# ' + result;
-				message += speech;
+				message += speech+'\n\n';
+				
+				message +=' Thank you! \n';
+				message +=' Enterprise Bot Service';
         sendEmail(subject, message, email);
 
     } else if (requestBody.result.action === 'team8-expediteorder') {
@@ -279,7 +282,9 @@ function getJson(requestBody, res, speech, returnedJson, action) {
         if (!('S' == status)) {
             speech = 'Order cannot be expedited. Please contact customer support. ';
         }           
-        message += speech;
+        message += speech+'\n\n';
+        message +=' Thank you! \n';
+				message +=' Enterprise Bot Service';
         sendEmail(subject, message, email);
     } else if (requestBody.result.action === 'team8-queryfeworder') {
         //const orderNumber = returnedJson.response.salesorders[0].salesorder[0].ordernumber;
@@ -482,7 +487,18 @@ function getOptionsPost(body, EBSFunctionName) {
 
 function callCreateOrder(itemName, qty, tokenName, tokenValue, callBackLastOrders) {
     //itemName
-    var body = '<params><param>1006</param><param>2626</param><param>1025</param><param>1026</param><param>' + qty + '</param></params>';
+    
+    var itemId = 2626;
+    
+    
+    if (itemName.includes('iphone')){
+    	itemId = 750038;
+    }	else if (itemName.includes('note')){
+    	itemId = 750039;
+    }
+    	
+    	
+    var body = '<params><param>1006</param><param>'+itemId+'</param><param>1025</param><param>1026</param><param>' + qty + '</param></params>';
     var returnxml;
 
     var reqPost = http.request(getOptionsPost(body, 'ONT_REST_CREATE_ORDER'), function(res) {
